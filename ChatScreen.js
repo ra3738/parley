@@ -21,7 +21,7 @@ const ChatScreen = ({navigation}) => {
             {key: 'James'},
           ]}
           renderItem={({item}) => 
-            <TouchableOpacity onPress={() => navigation.navigate('Chats')} style={styles.appButtonContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('Messages')} style={styles.appButtonContainer}>
               <Image style={styles.profilepic} source={require('./lake.jpg')}/>
               <View style={styles.texts}>
                 <Text style={styles.nameText}>{item.key}</Text>

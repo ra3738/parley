@@ -20,6 +20,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ChatScreen from './ChatScreen'
+import Messages from './Messages'
 
 const Stack = createStackNavigator();
 
@@ -28,6 +29,7 @@ const App = ({navigation}) => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Chats" component={ChatScreen} />
+        <Stack.Screen name="Messages" component={Messages} />
       </Stack.Navigator>
     </NavigationContainer>
   );
