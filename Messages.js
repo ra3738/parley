@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {Component} from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -9,48 +9,64 @@ import {
   Keyboard,
   FlatList,
   TouchableOpacity,
-  Image,
 } from 'react-native';
+import io from "socket.io-client"
 
-const Messages = ({navigation}) => {
-  const [currentMessage, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
-
-  const addToMessages = () => {
-    messages.push({value: currentMessage, key: messages.length.toString()});
-    setMessages(messages);
+export default class Messages extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      chatMessage: "",
+      chatMessages: []
+    };
   }
 
-  return (
-    <View style={{ flex: 1, justifyContent: 'center'}}>
-      <FlatList
-        data={messages}
-        renderItem={({item}) => 
-          <TouchableOpacity onPress={() => navigation.navigate('Messages')} style={styles.messageContainer}>
-            <View style={styles.texts}>
-              <Text style={styles.textMessage}>{item.value}</Text>
+  componentDidMount() {
+    this.socket = io("http://localhost:3000");
+    this.socket.on("chat message", msg => {
+      this.setState({ chatMessages: [...this.state.chatMessages, {value: msg, key: this.state.chatMessages.length.toString()}] });
+    });
+  }
+
+  submitChatMessage() {
+    this.socket.emit("chat message", this.state.chatMessage);
+    this.setState({ chatMessage: "" });
+  }
+
+  render() {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center'}}>
+        <FlatList
+          data={this.state.chatMessages}
+          renderItem={({item}) => 
+            <TouchableOpacity onPress={() => navigation.navigate('Chats')} style={styles.messageContainer}>
+              <View style={styles.texts}>
+                <Text style={styles.textMessage}>{item.value}</Text>
+              </View>
+            </TouchableOpacity>
+          }
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS == "ios" ? "padding" : "height"}
+          style={styles.container}
+          keyboardVerticalOffset={60}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.inner}>
+              <TextInput 
+                placeholder="Enter message ..." 
+                style={styles.textInput}
+                value={this.state.chatMessage}
+                onSubmitEditing={() => this.submitChatMessage()}
+                onChangeText={chatMessage => {
+                  this.setState({ chatMessage });
+                }}
+                />
             </View>
-          </TouchableOpacity>
-        }
-      />
-      <KeyboardAvoidingView
-        behavior={Platform.OS == "ios" ? "padding" : "height"}
-        style={styles.container}
-        keyboardVerticalOffset={60}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.inner}>
-            <TextInput 
-              placeholder="Enter message ..." 
-              style={styles.textInput}
-              onChangeText={text => setMessage(text)}
-              onSubmitEditing={() => addToMessages()} 
-              />
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </View>
-    
-  );
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -82,10 +98,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#80b0ff',
     padding: 5,
     marginLeft: 10,
+    marginRight: 10,
     marginTop: 15,
-    borderRadius: 15,
-    alignSelf: 'flex-start'
+    borderRadius: 13,
+    alignSelf: 'flex-end'
   }
 });
-
-export default Messages;
